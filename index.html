@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Browser Wars</title>
+<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
+<script>
+  function CreateTile(x,y, stage){
+    var rect = new createjs.Shape();
+    rect.graphics.beginFill("green").drawRect(0,0,50,50);
+    rect.x = x;
+    rect.y = y;
+
+    var rect2 = new createjs.Shape();
+    rect2.graphics.beginFill("lightgreen").drawRect(0,0,46,46);
+    rect2.x = x + 2;
+    rect2.y = y + 2;
+
+    stage.addChild(rect);
+    stage.addChild(rect2);
+  }
+
+  function GenerateField(height, width, stage)
+  {
+     var h_lim = height / 50;
+     var w_lim = width / 50;
+
+     for(var h = 0; h < h_lim; h++){
+       for(var w = 0; w < w_lim; w++){
+         CreateTile(w * 50,h * 50,stage);
+       }
+     }
+     stage.update();
+  }
+ 
+  var people = {};
+  
+  function init() {
+    var stage = new createjs.Stage("demoCanvas");
+    GenerateField(800,600, stage);
+    var img = new Image();
+    img.crossOrigin="Anonymous";
+    img.src = "https://s13.postimg.org/n1dqnac93/spritesheet.png";
+        var data = {
+      images : [img],
+      frames: {width:64, height:64},
+        animations: {
+            stand:0,
+            forwardwalk:{
+             frames: [0,1,2],
+             next: "forwardwalk",
+             speed: 0.5
+            },
+            leftwalk:{
+               frames: [7,8],
+               next:"leftwalk",
+               speed: 0.2
+            },
+            rightwalk:{
+                 frames:[3,4],
+                 next:"rightwalk",
+                 speed:2
+               },
+            backwalk:{
+              frames:[9,10,11],
+              next:"backwalk",
+              speed:0.5
+            }
+            }
+        };
+    var spritesheet = new createjs.SpriteSheet(data);
+    window.addEventListener('keydown', function(e){
+        var code = e.keyCode;
+        if( (code < 41) && (code > 36) ){
+           worker.postMessage([e.keyCode, people.myid]);
+        }
+    });
+
+		 function handleTick() {
+        stage.update();
+    }
+
+    createjs.Ticker.setFPS(40);
+    createjs.Ticker.on("tick", handleTick);
+    
+    var worker = new Worker('worker.js');
+    worker.onmessage = function(event){
+      resp = JSON.parse(event.data);
+      if(resp.status == "OK"){
+        people[resp.id] = new createjs.Sprite(spritesheet);
+        people[resp.id].id = resp.id;
+        people[resp.id].x  = parseInt(resp.x);
+        people[resp.id].y  = parseInt(resp.y);
+        people[resp.id].gotoAndPlay("stand");
+        people.myid  = resp.id
+        stage.addChild(people[resp.id]);
+      }
+
+      if(resp.status == "NEW_USER"){
+        if(people.myid != resp.id)
+        {
+        	people[resp.id] = new createjs.Sprite(spritesheet);
+          people[resp.id].id = resp.id;
+          people[resp.id].x  = parseInt(resp.x);
+          people[resp.id].y  = parseInt(resp.y);
+          people[resp.id].gotoAndPlay("stand");
+          stage.addChild(people[resp.id]);
+        }
+      }
+
+      if(resp.status == "USER_MOVED_LEFT"){
+				people[resp.id].id = resp.id;
+        people[resp.id].x  = parseInt(resp.x);
+        people[resp.id].y  = parseInt(resp.y)
+        people[resp.id].gotoAndPlay("leftwalk");
+      }
+      
+      if(resp.status == "USER_MOVED_RIGHT"){
+				people[resp.id].id = resp.id;
+        people[resp.id].x  = parseInt(resp.x);
+        people[resp.id].y  = parseInt(resp.y)
+        people[resp.id].gotoAndPlay("rightwalk");
+      }
+      
+      if(resp.status == "USER_MOVED_UP"){
+				people[resp.id].id = resp.id;
+        people[resp.id].x  = parseInt(resp.x);
+        people[resp.id].y  = parseInt(resp.y)
+        people[resp.id].gotoAndPlay("backwalk");
+      }
+      
+      if(resp.status == "USER_MOVED_DOWN"){
+				people[resp.id].id = resp.id;
+        people[resp.id].x  = parseInt(resp.x);
+        people[resp.id].y  = parseInt(resp.y)
+        people[resp.id].gotoAndPlay("forwardwalk");
+      }
+      
+      if(resp.status == "USER_LEFT"){
+        stage.removeChild(people[resp.id]);
+				delete people[resp.id];
+      }
+    }
+  }
+</script>
+</head>
+
+<body onload="init();">
+  <canvas id="demoCanvas" width="800" height="600"></canvas>
+</body>
+
+</html>
