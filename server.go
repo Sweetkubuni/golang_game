@@ -3,13 +3,9 @@ package main
 import (
     "github.com/gorilla/websocket"
     "net/http"
-    "os"
-    "fmt"
-    "io/ioutil"
     "math/rand"
     "time"
     "encoding/json"
-    "encoding/binary"
 )
 
 
@@ -18,12 +14,12 @@ func random(min, max int) int {
     return rand.Intn(max - min) + min
 }
 
-type Game_REQUEST struct{
+type Game_Request struct{
      command string `json:"command"`
      id      int    `json:"id"`
 }
 
-type Game_RESPONSE struct{
+type Game_Response struct{
     status string `json:"status"`
     id     int    `json:"id"`
     x      int    `json:"x"`
@@ -32,19 +28,19 @@ type Game_RESPONSE struct{
 
 type Hub struct{
     clients map[*Client] int
-    broadcast     chan Game_Request
+    broadcast     chan [] byte
     addClient     chan *Client
     removeClient  chan *Client
     handle_req    chan []byte
-    count         int64
+    count         int
 }
 // initialize a new hub
 var hub = Hub{
     broadcast:     make(chan []byte, 4096),
     addClient:     make(chan *Client),
     removeClient:  make(chan *Client),
-    clients:       make(map[*Client]bool),
-    handle_req:    make(chan Game_REQUEST, 50),
+    clients:       make(map[*Client]int),
+    handle_req:    make(chan [] byte, 2048),
     count  :       0,
 }
 
@@ -57,42 +53,37 @@ func  worker() {
         // one of these fires when a channel 
         // receives data
         select {
-        case data  := <=hub.handle_req:
-             var parsed Game_REQUEST
+        case data  := <-hub.handle_req:
+             var parsed Game_Request
              err := json.Unmarshal(data, &parsed)
              if err == nil {
                  for conn := range hub.clients {
-                    if(hub.clients[conn] == parsed.id)
-                    {
-                        if(parsed.command == "MOVE_LEFT")
-                        {
+                    if hub.clients[conn] == parsed.id {
+                        if parsed.command == "MOVE_LEFT" {
                             conn.x -= 16
-                            new_response := Game_RESPONSE {"USER_MOVED_LEFT", hub.clients[conn], conn.x, conn.y}
-                            msg := json.Marshal(new_response)
+                            new_response := Game_Response {"USER_MOVED_LEFT", hub.clients[conn], conn.x, conn.y}
+                            msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
-                        
-                        if(parsed.command == "MOVE_RIGHT")
-                        {
+
+                        if parsed.command == "MOVE_RIGHT" {
                             conn.x += 16
-                            new_response := Game_RESPONSE {"USER_MOVED_RIGHT", hub.clients[conn], conn.x, conn.y}
-                            msg := json.Marshal(new_response)
+                            new_response := Game_Response {"USER_MOVED_RIGHT", hub.clients[conn], conn.x, conn.y}
+                            msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                         
-                        if(parsed.command == "MOVE_UP")
-                        {
+                        if parsed.command == "MOVE_UP" {
                             conn.y -= 16
-                            new_response := Game_RESPONSE {"USER_MOVED_UP", hub.clients[conn], conn.x, conn.y}
-                            msg := json.Marshal(new_response)
+                            new_response := Game_Response {"USER_MOVED_UP", hub.clients[conn], conn.x, conn.y}
+                            msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                         
-                        if(parsed.command == "MOVE_DOWN")
-                        {
+                        if parsed.command == "MOVE_DOWN" {
                             conn.y += 16
-                            new_response := Game_RESPONSE {"USER_MOVED_DOWN", hub.clients[conn], conn.x, conn.y}
-                            msg := json.Marshal(new_response)
+                            new_response := Game_Response {"USER_MOVED_DOWN", hub.clients[conn], conn.x, conn.y}
+                            msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                     }
@@ -102,17 +93,18 @@ func  worker() {
             conn.x =  random(100, 700)
             conn.y =  random(100, 500)
             // add a new client
-            hub.clients[conn] = ++hub.count
+            hub.count += 1
+            hub.clients[conn] = hub.count
             //let new client know it has been accepted. also, let it know the position and it's id
-            response := Game_RESPONSE {"OK", hub.clients[conn], conn.x, conn.y}
-            msg := json.Marshal(response)
+            response := Game_Response {"OK", hub.clients[conn], conn.x, conn.y}
+            msg,_ := json.Marshal(response)
             conn.send <- msg
-            broadcast_response := Game_RESPONSE {"NEW_USER", hub.clients[conn], conn.x, conn.y}
-            msg2 := json.Marshal(broadcast_response)
+            broadcast_response := Game_Response {"NEW_USER", hub.clients[conn], conn.x, conn.y}
+            msg2,_ := json.Marshal(broadcast_response)
             hub.broadcast <- msg2
         case conn := <-hub.removeClient:
-            broadcast_response := Game_RESPONSE {"USER_LEFT", hub.clients[conn], 0, 0}
-            msg := json.Marshal(broadcast_response)
+            broadcast_response := Game_Response {"USER_LEFT", hub.clients[conn], 0, 0}
+            msg,_ := json.Marshal(broadcast_response)
             hub.broadcast <- msg
             // remove a client
             if _, ok := hub.clients[conn]; ok {

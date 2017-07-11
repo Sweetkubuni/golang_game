@@ -1,4 +1,4 @@
-var ws = new WebSocket("ws://ip:8080/game");
+var ws = new WebSocket("ws://162.245.217.17:8080/game");
 ws.onmessage = function(evt){
   postMessage(evt.data);
 }
