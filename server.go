@@ -46,7 +46,10 @@ var hub = Hub{
 
 var MAX_WORKERS = 5
 
-
+var upgrader = websocket.Upgrader {
+    ReadBufferSize: 1024,
+    WriteBufferSize: 1024,
+}
 // Runs forever as a goroutine
 func  worker() {
     for {
@@ -196,6 +199,6 @@ func main(){
        go worker()
    }
   http.Handle("/", http.FileServer(http.Dir("./static")))
-  http.Handle("/game", ws_handler)
+  http.HandleFunc("/game", ws_handler)
   http.ListenAndServe(":8080", nil)
 }
