@@ -5,8 +5,13 @@ ws.onopen = function() {
 }
 ws.onmessage = function(evt){
   postMessage(evt.data);
-  console.log("recieved the following data: " + evt.data + "\n");
+  console.log("[ALERT] Data Recieved: " + evt.data + "\n");
 }
+
+// Log errors
+ws.onerror = function (error) {
+  console.log('[Error] websocket Error:  ' + error + "\n");
+};
 
 onmessage = function(e){
   console.log("sending the following command: " + e.data[0] + "\n");
