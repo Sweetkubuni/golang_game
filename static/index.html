@@ -87,6 +87,7 @@
     var worker = new Worker('worker.js');
     worker.onmessage = function(event){
       resp = JSON.parse(event.data);
+      alert(resp)
       if(resp.status == "OK"){
         people[resp.id] = new createjs.Sprite(spritesheet);
         people[resp.id].id = resp.id;

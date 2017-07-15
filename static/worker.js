@@ -1,9 +1,15 @@
 var ws = new WebSocket("ws://162.245.217.17:8080/game");
+
+ws.onopen = function() {
+  console.log("connected\n");
+}
 ws.onmessage = function(evt){
   postMessage(evt.data);
+  console.log("recieved the following data: " + evt.data + "\n");
 }
 
 onmessage = function(e){
+  console.log("sending the following command: " + e.data[0] + "\n");
   switch(e.data[0])
   {
     case 37: //left
