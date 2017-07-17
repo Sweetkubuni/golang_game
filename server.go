@@ -65,28 +65,28 @@ func  worker() {
                     if hub.clients[conn] == parsed.id {
                         if parsed.command == "MOVE_LEFT" {
                             conn.x -= 16
-                            new_response := Game_Response {"USER_MOVED_LEFT", hub.clients[conn], conn.x, conn.y}
+                            new_response := map[string]string{"status": "USER_MOVED_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
 
                         if parsed.command == "MOVE_RIGHT" {
                             conn.x += 16
-                            new_response := Game_Response {"USER_MOVED_RIGHT", hub.clients[conn], conn.x, conn.y}
+                            new_response := map[string]string{"status": "USER_MOVED_RIGHT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                         
                         if parsed.command == "MOVE_UP" {
                             conn.y -= 16
-                            new_response := Game_Response {"USER_MOVED_UP", hub.clients[conn], conn.x, conn.y}
+                            new_response := map[string]string{"status": "USER_MOVED_UP", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                         
                         if parsed.command == "MOVE_DOWN" {
                             conn.y += 16
-                            new_response := Game_Response {"USER_MOVED_DOWN", hub.clients[conn], conn.x, conn.y}
+                            new_response := map[string]string{"status": "USER_MOVED_DOWN", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
@@ -103,11 +103,11 @@ func  worker() {
             response := map[string]string{"status": "OK", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
             msg,_ := json.Marshal(response)
             conn.send <- msg
-            broadcast_response := Game_Response {"NEW_USER", hub.clients[conn], conn.x, conn.y}
+            broadcast_response := map[string]string{"status": "NEW_USER", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
             msg2,_ := json.Marshal(broadcast_response)
             hub.broadcast <- msg2
         case conn := <-hub.removeClient:
-            broadcast_response := Game_Response {"USER_LEFT", hub.clients[conn], 0, 0}
+             broadcast_response := map[string]string{"status": "USER_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(0), "y":strconv.Itoa(0)}
             msg,_ := json.Marshal(broadcast_response)
             hub.broadcast <- msg
             // remove a client
