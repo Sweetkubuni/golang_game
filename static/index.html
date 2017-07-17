@@ -41,7 +41,7 @@
     GenerateField(800,600, stage);
     var img = new Image();
     img.crossOrigin="Anonymous";
-    img.src = "spritesheet.png";
+    img.src = "https://s13.postimg.org/n1dqnac93/spritesheet.png";
         var data = {
       images : [img],
       frames: {width:64, height:64},
@@ -70,10 +70,28 @@
             }
         };
     var spritesheet = new createjs.SpriteSheet(data);
+    people.ws = new WebSocket("ws://ip:8080/game");
     window.addEventListener('keydown', function(e){
         var code = e.keyCode;
         if( (code < 41) && (code > 36) ){
-           worker.postMessage([e.keyCode, people.myid]);
+           switch(code)
+          {
+            case 37: //left
+            people.ws.send('{"command":"MOVE_LEFT", "id":"' + people.myid + '"}');
+            break;
+
+            case 38: //up
+            people.ws.send('{"command":"MOVE_UP", "id":"' + people.myid + '"}');
+            break;
+
+            case 39: //right
+            people.ws.send('{"command":"MOVE_RIGHT", "id":"' + people.myid + '"}');
+            break;
+
+            case 40: //down
+            people.ws.send('{"command":"MOVE_DOWN", "id":"' + people.myid + '"}');
+            break;
+          }
         }
     });
 
@@ -84,10 +102,8 @@
     createjs.Ticker.setFPS(40);
     createjs.Ticker.on("tick", handleTick);
     
-    var worker = new Worker('worker.js');
-    worker.onmessage = function(event){
+    people.ws.onmessage = function(event){
       resp = JSON.parse(event.data);
-      alert(resp)
       if(resp.status == "OK"){
         people[resp.id] = new createjs.Sprite(spritesheet);
         people[resp.id].id = resp.id;
@@ -96,6 +112,7 @@
         people[resp.id].gotoAndPlay("stand");
         people.myid  = resp.id
         stage.addChild(people[resp.id]);
+        console.log("UPDATE: your id has been created");
       }
 
       if(resp.status == "NEW_USER"){
@@ -107,6 +124,7 @@
           people[resp.id].y  = parseInt(resp.y);
           people[resp.id].gotoAndPlay("stand");
           stage.addChild(people[resp.id]);
+          console.log("UPDATE: New User");
         }
       }
 
@@ -141,8 +159,15 @@
       if(resp.status == "USER_LEFT"){
         stage.removeChild(people[resp.id]);
 				delete people[resp.id];
+        console.log("UPDATE: User Left");
       }
+    } //onmessage end
+
+    people.ws.onerror = function(event){
+      console.log("Error: " + event.data);
     }
+
+    
   }
 </script>
 </head>
