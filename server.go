@@ -101,7 +101,6 @@ func  worker() {
             hub.clients[conn] = hub.count
             //let new client know it has been accepted. also, let it know the position and it's id
             response := map[string]string{"status": "OK", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
-            response := Game_Response {"OK", hub.clients[conn], conn.x, conn.y}
             msg,_ := json.Marshal(response)
             conn.send <- msg
             broadcast_response := Game_Response {"NEW_USER", hub.clients[conn], conn.x, conn.y}
