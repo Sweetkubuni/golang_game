@@ -57,6 +57,7 @@ func  worker() {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
                         if command == "MOVE_LEFT" {
+                            fmt.Println("running command")
                             new_response := map[string]string{"status": "MOVED_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
