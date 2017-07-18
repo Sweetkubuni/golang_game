@@ -15,18 +15,6 @@ func random(min, max int) int {
     return rand.Intn(max - min) + min
 }
 
-type Game_Request struct{
-     command string `json:"command"`
-     id      int    `json:"id"`
-}
-
-type Game_Response struct{
-    status string `json:"status"`
-    id     int    `json:"id"`
-    x      int    `json:"x"`
-    y      int    `json:"y"`
-}
-
 type Hub struct{
     clients map[*Client] int
     broadcast     chan [] byte
@@ -58,33 +46,35 @@ func  worker() {
         // receives data
         select {
         case data  := <-hub.handle_req:
-             var parsed Game_Request
+             var parsed map[string]interface{}
              err := json.Unmarshal(data, &parsed)
+             client_id := parse["id"].(int)
+             command := parse["command"]
              if err == nil {
                  for conn := range hub.clients {
-                    if hub.clients[conn] == parsed.id {
-                        if parsed.command == "MOVE_LEFT" {
+                    if hub.clients[conn] == client_id {
+                        if command == "MOVE_LEFT" {
                             conn.x -= 16
                             new_response := map[string]string{"status": "USER_MOVED_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
 
-                        if parsed.command == "MOVE_RIGHT" {
+                        if command == "MOVE_RIGHT" {
                             conn.x += 16
                             new_response := map[string]string{"status": "USER_MOVED_RIGHT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                         
-                        if parsed.command == "MOVE_UP" {
+                        if command == "MOVE_UP" {
                             conn.y -= 16
                             new_response := map[string]string{"status": "USER_MOVED_UP", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
                         }
                         
-                        if parsed.command == "MOVE_DOWN" {
+                        if command == "MOVE_DOWN" {
                             conn.y += 16
                             new_response := map[string]string{"status": "USER_MOVED_DOWN", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
