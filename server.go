@@ -26,7 +26,7 @@ type Hub struct{
 }
 // initialize a new hub
 var hub = Hub{
-    broadcast:     make(chan []byte, 4096),
+    broadcast:     make(chan []byte),
     addClient:     make(chan *Client),
     removeClient:  make(chan *Client),
     clients:       make(map[*Client]int),
