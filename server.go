@@ -48,7 +48,7 @@ func  worker() {
         case data  := <-hub.handle_req:
              var parsed map[string]interface{}
              err := json.Unmarshal(data, &parsed)
-             client_id := parsed["id"].(int)
+             client_id := parsed["id"]
              command := parsed["command"].(string)
              if err == nil {
                  for conn := range hub.clients {
