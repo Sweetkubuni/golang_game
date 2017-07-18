@@ -26,7 +26,7 @@ type Hub struct{
 }
 // initialize a new hub
 var hub = Hub{
-    broadcast:     make(chan []byte),
+    broadcast:     make(chan []byte, 4096),
     addClient:     make(chan *Client),
     removeClient:  make(chan *Client),
     clients:       make(map[*Client]int),
@@ -57,7 +57,6 @@ func  worker() {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
                         if command == "MOVE_LEFT" {
-                            conn.x -= 16
                             new_response := map[string]string{"status": "USER_MOVED_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
