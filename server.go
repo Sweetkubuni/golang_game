@@ -7,6 +7,7 @@ import (
     "time"
     "encoding/json"
     "strconv"
+    "fmt"
 )
 
 
@@ -50,6 +51,8 @@ func  worker() {
              err := json.Unmarshal(data, &parsed)
              client_id := parsed["id"]
              command := parsed["command"].(string)
+             fmt.Println(client_id)
+             fmt.Println(command)
              if err == nil {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
