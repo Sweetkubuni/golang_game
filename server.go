@@ -49,7 +49,8 @@ func  worker() {
         case data  := <-hub.handle_req:
              var parsed map[string]interface{}
              err := json.Unmarshal(data, &parsed)
-             client_id := strconv.ParseInt(parsed["id"].(string), 10, 64)
+             val := parsed["id"].(string)
+             client_id := strconv.ParseInt(val, 10, 64)
              command := parsed["command"].(string)
              fmt.Println(client_id)
              fmt.Println(command)
