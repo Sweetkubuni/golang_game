@@ -49,7 +49,7 @@ func  worker() {
              var parsed map[string]interface{}
              err := json.Unmarshal(data, &parsed)
              client_id := parsed["id"].(int)
-             command := parsed["command"]
+             command := parsed["command"].(string)
              if err == nil {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
