@@ -53,7 +53,7 @@ func  worker() {
              command := parsed["command"].(string)
              fmt.Println(client_id)
              fmt.Println(command)
-             fmt.Println(err)
+             fmt.Println(err == nil)
              if err == nil {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
