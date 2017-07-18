@@ -56,6 +56,7 @@ func  worker() {
              fmt.Println(err == nil)
              if err == nil {
                  for conn := range hub.clients {
+                     fmt.Println(hub.clients[conn])
                     if hub.clients[conn] == client_id {
                         fmt.Println("User found!")
                         if command == "MOVE_LEFT" {
