@@ -49,16 +49,14 @@ func  worker() {
         case data  := <-hub.handle_req:
              var parsed map[string]interface{}
              err := json.Unmarshal(data, &parsed)
-             client_id, _ := parsed["id"].(int)
+             client_id := strconv.ParseInt(parsed["id"].(string), 10, 64)
              command := parsed["command"].(string)
              fmt.Println(client_id)
              fmt.Println(command)
              fmt.Println(err == nil)
              if err == nil {
                  for conn := range hub.clients {
-                     fmt.Println(hub.clients[conn])
                     if hub.clients[conn] == client_id {
-                        fmt.Println("User found!")
                         if command == "MOVE_LEFT" {
                             new_response := map[string]string{"status": "USER_MOVED_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
