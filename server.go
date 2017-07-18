@@ -110,6 +110,7 @@ func  worker() {
             }
         case message := <-hub.broadcast:
             // broadcast a message to all clients
+            fmt.Println("Broadcasting data to all clients")
             for conn := range hub.clients {
                 select {
                 case conn.send <- message:
