@@ -77,19 +77,19 @@
            switch(code)
           {
             case 37: //left
-            people.ws.send('{"command":"MOVE_LEFT", "id":"' + people.myid + '"}');
+            people.ws.send('{"command":"MOVE_LEFT", "id":' + people.myid + '}');
             break;
 
             case 38: //up
-            people.ws.send('{"command":"MOVE_UP", "id":"' + people.myid + '"}');
+            people.ws.send('{"command":"MOVE_UP", "id":' + people.myid + '}');
             break;
 
             case 39: //right
-            people.ws.send('{"command":"MOVE_RIGHT", "id":"' + people.myid + '"}');
+            people.ws.send('{"command":"MOVE_RIGHT", "id":' + people.myid + '}');
             break;
 
             case 40: //down
-            people.ws.send('{"command":"MOVE_DOWN", "id":"' + people.myid + '"}');
+            people.ws.send('{"command":"MOVE_DOWN", "id":' + people.myid + '}');
             break;
           }
         }
