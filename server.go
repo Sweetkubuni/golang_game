@@ -34,6 +34,11 @@ var hub = Hub{
     count  :       0,
 }
 
+type Request struct {
+    command string
+    id     int
+}
+
 var MAX_WORKERS = 5
 
 var upgrader = websocket.Upgrader {
@@ -47,13 +52,10 @@ func  worker() {
         // receives data
         select {
         case data  := <-hub.handle_req:
-             var parsed map[string]interface{}
+             parsed := Request{}
              err := json.Unmarshal(data, &parsed)
-             client_id := parsed["id"].(int)
-             command := parsed["command"].(string)
-             fmt.Println(client_id)
-             fmt.Println(command)
-             fmt.Println(err == nil)
+             client_id := parsed.id
+             command := parsed.command
              if err == nil {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
