@@ -61,6 +61,7 @@ func  worker() {
                     if hub.clients[conn] == client_id {
                         fmt.Println("User found!")
                         if command == "MOVE_LEFT" {
+                            conn.x -= 16
                             new_response := map[string]string{"status": "USER_MOVED_LEFT", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
                             msg,_ := json.Marshal(new_response)
                             hub.broadcast <- msg
