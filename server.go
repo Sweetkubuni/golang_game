@@ -35,8 +35,8 @@ var hub = Hub{
 }
 
 type Request struct {
-    command string
-    id     int
+    Command string `json:"command"`
+    Id     int `json:"id"`
 }
 
 var MAX_WORKERS = 5
@@ -54,8 +54,8 @@ func  worker() {
         case data  := <-hub.handle_req:
              parsed := Request{}
              err := json.Unmarshal(data, &parsed)
-             client_id := parsed.id
-             command := parsed.command
+             client_id := parsed.Id
+             command := parsed.Command
              if err == nil {
                  for conn := range hub.clients {
                     if hub.clients[conn] == client_id {
