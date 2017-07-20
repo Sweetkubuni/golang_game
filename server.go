@@ -103,6 +103,7 @@ func  worker() {
             broadcast_response := map[string]string{"status": "NEW_USER", "id": strconv.Itoa(hub.clients[conn]), "x":strconv.Itoa(conn.x), "y":strconv.Itoa(conn.y)}
             msg2,_ := json.Marshal(broadcast_response)
             hub.broadcast <- msg2
+            // update new user with the older clients on the server
             for older_clients := range hub.clients {
                 relay_response := map[string]string{"status": "NEW_USER", "id": strconv.Itoa(hub.clients[older_clients]), "x":strconv.Itoa(older_clients.x), "y":strconv.Itoa(older_clients.y)}
                 relay_msg,_ := json.Marshal(relay_response)
@@ -115,7 +116,7 @@ func  worker() {
             // remove a client
             if _, ok := hub.clients[conn]; ok {
                 delete(hub.clients, conn)
-                close(conn.send)
+                close(conn.send) 
             }
         case message := <-hub.broadcast:
             // broadcast a message to all clients
